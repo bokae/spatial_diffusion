@@ -2,6 +2,7 @@ import numpy as np
 import json
 import pickle
 import sys
+from scipy.optimize import curve_fit
 
 
 class SI:
@@ -98,7 +99,39 @@ class SI:
 
         # storing results, raw output
         return {
-            "time_infected": {str(self.indexmap_back[i]): int(t) for i, t in enumerate(self.time_infected)},
+            "time_infected": {str(self.indexmap_back[i]): int(t) for i, t in enumerate(self.time_infected) if t!=0},
+            "p": self.p,
+            "q": self.q,
+            "stop": self.stop,
+            "num_nodes": self.A.shape[0],
+            "high": self.high,
+            "low": self.low
+        }
+
+    def run_batch(self):
+        # storing results of multiple runs in a dictionary
+        o = {}
+        # running the simulation multiple times, same parametrization
+        for run in range(self.num_runs):
+            res = self.run_new()
+            o["run_" + str(run).zfill(2)] = res
+
+        return o
+
+    def average_batch(self, o):
+        timelines = []
+
+        for r in o:
+            node_adoptions = o[r]["time_infected"]
+
+            # getting adoption time histogram
+            timeline = np.zeros(self.stop)
+            for k in node_adoptions.keys():
+                timeline[node_adoptions[k] - 1] += 1
+            timelines.append(timeline)
+
+        return {
+            "avg_timeline": list(np.array(timelines).mean(axis=0)),
             "p": self.p,
             "q": self.q,
             "stop": self.stop,
@@ -108,8 +141,24 @@ class SI:
         }
 
 
-if __name__ == "__main__":
+class DE_fit:
+    def __init__(self, avg_output):
+        self.t = np.array(range(1,avg_output["stop"]+1))
+        self.timeline = avg_output["avg_timeline"]
+        self.cum_timeline = np.cumsum(self.timeline)
+        self.N = avg_output["num_nodes"]
+        self.p = avg_output["p"]
+        self.q = avg_output["q"]
 
+    def bass_solution(self, t, P, Q):
+        # Bass DE solution
+        return self.N * (1-np.exp(-(P+Q)*t))/(1+Q/P*np.exp(-(P+Q)*t))
+
+    def fit(self):
+        param, param_cov = curve_fit(self.bass_solution, self.t, self.cum_timeline, p0=[self.p, self.q])
+        return param, param_cov
+
+if __name__ == "__main__":
     # reading config from standard input, if None, then values are default
     conf = json.load(sys.stdin)
     # initializing simulation with values from conf
