@@ -5,7 +5,8 @@ library(tictoc)
 mode <- "iwiw"
 
 init <- function(){
-    # reading params from the config conf, otherwise set to default
+# This is the function, where we can set up the global parameters of the whole simulation.
+
     # parameter 'p' of the Bass model
     p_par <<- 0.000104
     # parameter 'q' of the Bass model
@@ -18,14 +19,20 @@ init <- function(){
 
     # creating necessary tables
     if (mode == "karate"){
+        # this is the mode where we read the Zachary network edgelist for educational/debugging purposes
+        # number of nodes
         N <<- 34
         elist <<- fread("R_karate.csv")
+        # the edgelist only lists edges once, to create a full adj matrix, we have to give the reverse column
+        # order as well to the sparse matrix constructor
         A <<- sparseMatrix(c(elist$V1,elist$V2),c(elist$V2,elist$V1),dims=c(N,N))
+        # initial infected nodes
         seed <<- as.vector(c(1,2))
     }
     
     # R indexes from 1!!!
     if (mode == "iwiw"){
+        # iwiw sample network
         N <<- 271941
         elist <- fread("R_adj.csv.gz")
         A <<- sparseMatrix(
@@ -40,6 +47,9 @@ init <- function(){
 }
 
 restart <- function(){
+# This function restarts the simulation: it sets only the seeds as infected, everyone else susceptible, and resets the time counter to 1.
+# Also, it empties the time_infected list that stores the infection time of the nodes.
+
     # init new simulation
     time_counter <<- 1
 
@@ -69,6 +79,8 @@ restart <- function(){
 }
 
 step_time <- function(){
+# This is a function that forwards the simulation by 1 timestep.
+
     # init stopper
     tic()
 
@@ -76,13 +88,13 @@ step_time <- function(){
     time_counter <<- time_counter + 1
 
     # fraction of infected neighbors vs total neighbors
-    a <<- node_neighborhood_num_infected/node_neighborhood_num_neighbors
+    a <- node_neighborhood_num_infected/node_neighborhood_num_neighbors
     # uniform random number between 0 and 1
-    r <<- runif(N)
+    r <- runif(N)
     # calculating threshold, comparing random number to threshold
-    mask <<- r < p_par + q_par*a
+    mask <- r < p_par + q_par*a
     # infect nodes where random number is smaller than the threshold and that are susceptible
-    new_infected <<- susceptible & mask
+    new_infected <- susceptible & mask
 
     # store infection time for newly infected nodes
     time_infected[which(new_infected)] <<- time_counter
@@ -105,10 +117,18 @@ step_time <- function(){
 
 }
 
+
+## main code
 init()
 restart()
 
-for (i in 2:stop_par){
-   step_time()
+if (mode=="iwiw"){
+    for (i in 2:stop_par){
+    step_time()
+    }
 }
+
+# result
+plot(table(cumsum(time_infected)))
+plot(cumsum(table(time_infected)))
 
