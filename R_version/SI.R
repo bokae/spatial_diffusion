@@ -129,6 +129,6 @@ if (mode=="iwiw"){
 }
 
 # result
-plot(table(cumsum(time_infected)))
+plot(table(time_infected))
 plot(cumsum(table(time_infected)))
 
