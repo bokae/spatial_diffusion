@@ -3,7 +3,7 @@ import json
 import pickle
 import sys
 from scipy.optimize import curve_fit
-
+from time import time
 
 class SI:
     def __init__(self, **conf):
@@ -22,13 +22,12 @@ class SI:
         self.num_runs = conf.get("num_runs", 1)
 
         # reading in byte-saved variables created by preferences.py that are the same for each run
-        with open('adjacency.pickle', 'rb') as f:
+        with open('adjacency_wn.pickle', 'rb') as f:
             # A is the adjacency matrix
             # indexmap maps user_ids to the row indices of A
             # indexmap_back maps row indices of A to user_ids
             # seed is a boolean vector of the initial infected nodes
             self.A, self.indexmap, self.indexmap_back, self.seed = pickle.load(f)
-
         # creating the necessary variables, setting the initial infected nodes
         self.restart()
 
@@ -67,6 +66,7 @@ class SI:
         return np.polyval(params, a)*np.array(a)
 
     def step_time(self):
+        t1 = time()
         # increment time counter
         self.time_counter += 1
 
@@ -87,7 +87,8 @@ class SI:
         self.susceptible = self.susceptible & (~new_infected)
         # incrementing the counters in the array storing the number of infected neighbors
         self.node_neighborhood_num_infected += self.A[new_infected].sum(axis=0)
-
+        t2 = time()
+        # print("Step %s, %.2f seconds elapsed." % (str(self.time_counter).zfill(3),t2-t1))
         return new_infected.sum()
 
     def run_new(self):
