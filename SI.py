@@ -22,7 +22,7 @@ class SI:
         self.num_runs = conf.get("num_runs", 1)
 
         # reading in byte-saved variables created by preferences.py that are the same for each run
-        with open('adjacency_wn.pickle', 'rb') as f:
+        with open('adjacency.pickle', 'rb') as f:
             # A is the adjacency matrix
             # indexmap maps user_ids to the row indices of A
             # indexmap_back maps row indices of A to user_ids
