@@ -23,4 +23,17 @@ seed = np.array(nodelist.index[nodelist['month']==1].map(indexmap))
 
 # saving as binary
 with open('adjacency.pickle', 'wb') as f:
-    pickle.dump([A,indexmap,indexmap_back,seed], f)
+   pickle.dump([A,indexmap,indexmap_back,seed], f)
+
+edgelist["i"] = edgelist["id1"].map(indexmap)
+edgelist["j"] = edgelist["id2"].map(indexmap)
+
+edgelist[["i","j"]].to_csv("R_version/R_adj.csv",index=False,header=True)
+np.savetxt(
+    "R_version/R_seed.csv.gz",
+    seed,
+    fmt="%u",
+    delimiter=","
+)
+
+#print("Number of nodes:", len(G.nodes()))
