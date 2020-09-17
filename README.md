@@ -3,6 +3,7 @@
 This repository contains the codes of the simulation for the article
 
 Lengyel, B., Bokányi, E., Di Clemente, R. et al. The role of geography in the complex diffusion of innovations. Sci Rep 10, 15065 (2020). https://doi.org/10.1038/s41598-020-72137-w
+
 https://www.nature.com/articles/s41598-020-72137-w
 
 Comments and questions are welcome either as an issue or as an e-mail to `eszter.bokanyi` (at) `uni-corvinus.hu`.
