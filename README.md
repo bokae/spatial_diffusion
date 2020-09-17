@@ -7,6 +7,7 @@ https://www.nature.com/articles/s41598-020-72137-w
 
 Comments and questions are welcome either as an issue or as an e-mail to `eszter.bokanyi` (at) `uni-corvinus.hu`.
 
+## Content
 
 Codes for the SI simulation of the spatial diffusion project.
 
